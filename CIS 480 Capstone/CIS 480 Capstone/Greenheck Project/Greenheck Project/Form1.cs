@@ -25,10 +25,12 @@ namespace Greenheck_Project
             //clears contents from department drop-down then refills, preventing multiple instances
             //of a single entity.
             cbDept.Items.Clear();
+            cbDeptID.Items.Clear();
             List<Department> dept = Database.DataRetrievalClass.GetDept();
             foreach (Department d in dept)
             {
                 cbDept.Items.Add(d.deptName);
+                cbDeptID.Items.Add(d.deptID);
             }
 
 
@@ -48,6 +50,24 @@ namespace Greenheck_Project
             {
                 cbDelTeam.Items.Add(t.name);
             }
+
+            //populate team id drop-down with values that do not already exist.
+            cbTeamID.Items.Clear();
+            int[] ids = new int[them.Count];
+
+            for(int i=0; i < them.Count; i++)
+            {
+                ids[i] = them[i].id;
+            }
+            for(int i = 1; i < 50; i++)
+            {
+                if (!ids.Contains(i))
+                {
+                    cbTeamID.Items.Add(i);
+                }
+            }
+            
+            
         }
 
         //Filter method, when a department is chosen it filters the teams in the team drop-down
@@ -68,22 +88,23 @@ namespace Greenheck_Project
         //Creates a new entry in TeamTable
         private void btnCreateTeam_Click(object sender, EventArgs e)
         {
-            //Create a new Team object from data provided in the text boxes
+            //Create a new Team object from data provided in the text and combo boxes
             Teams here = new Teams();
-            here.id = Convert.ToInt32(txtTeamID.Text);
+            here.id= Int32.Parse(cbTeamID.SelectedItem.ToString());
             here.name = txtTeamName.Text;
-
+            
             //Check to see if a team with the same name or id exists. If so, display message and prevent creation.
-            if (Database.DataRetrievalClass.TeamExists(Convert.ToInt32(txtTeamID.Text), txtTeamName.Text))
+            if (Database.DataRetrievalClass.TeamExists(Convert.ToInt32(cbTeamID.SelectedValue), txtTeamName.Text))
             {
-                MessageBox.Show("The name or id of this team already exists, please choose another.");
+                MessageBox.Show("The name of this team already exists, please choose another.");
             }
             else
             {
-                DataRetrievalClass.CreateTeam(Convert.ToInt32(txtTeamID.Text), txtTeamName.Text, Convert.ToInt32(txtDeptID.Text));
+                int dep = Int32.Parse(cbDeptID.SelectedItem.ToString());
+                DataRetrievalClass.CreateTeam(here.id, here.name, dep);
                 MessageBox.Show( txtTeamName.Text + " successfully created.");
-                txtTeamID.Clear();
-                txtDeptID.Clear();
+                cbTeamID.Refresh();
+                cbDeptID.Refresh();
                 txtTeamName.Clear();
             }
         }
@@ -93,6 +114,7 @@ namespace Greenheck_Project
         {
             //Retrieve the ID of a team from the database by searching for the selected name in the drop-down.
             int teamID = DataRetrievalClass.GetTeamByName(cbDelTeam.SelectedItem.ToString());
+            cbDelTeam.Items.Remove(cbDelTeam.SelectedItem.ToString());
             //Deletes team from database and shows a confirmation message.
             DataRetrievalClass.DeleteTeam(teamID);
             MessageBox.Show(cbDelTeam.SelectedItem + " has been terminated.");
