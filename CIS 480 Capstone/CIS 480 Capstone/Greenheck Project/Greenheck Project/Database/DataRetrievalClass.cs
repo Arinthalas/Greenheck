@@ -149,6 +149,13 @@ namespace Greenheck_Project.Database
 
             put.ExecuteNonQuery();
 
+            //put.CommandText = "INSERT INTO DeptTeamBridge VALUES(@param1, @param2)";
+            //put.Parameters.Clear();
+            //put.Parameters.AddWithValue("@param1", dept);
+            //put.Parameters.AddWithValue("@param2", id);
+
+            //put.ExecuteNonQuery();
+
             put.Connection.Close();
         }
 
@@ -158,10 +165,12 @@ namespace Greenheck_Project.Database
             SqlCommand rem = new SqlCommand();
             rem.Connection = GetConn();
 
-            rem.CommandText = "DELETE FROM TeamTable WHERE TeamId = @param1";
+            rem.CommandText = "DELETE FROM TeamTable WHERE TeamID = @param1";
             rem.Parameters.Add(new SqlParameter("@param1", id));
 
             rem.ExecuteNonQuery();
+
+            rem.CommandText = "DELETE FROM DeptTeamBridge WHERE TeamID = @param1";
 
             rem.Connection.Close();
         }
